@@ -49,3 +49,4 @@ defaults:
 exclude:
   - LICENSE
   - README.md
+  - .gitignore
