@@ -417,5 +417,5 @@ header.header-post .post-heading .post-subheading {
 
 .fit-to-parent
 {
-    width: 100%;	
+    max-width: 100%;	
 }
