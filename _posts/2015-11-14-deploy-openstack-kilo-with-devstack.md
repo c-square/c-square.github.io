@@ -283,6 +283,7 @@ export OS_AUTH_URL=http://127.0.0.1:5000/v2.0
 
 **IMPORTANT:** If the scripts doesn't end properly or something else goes wrong, please unstack first using ```./unstack.sh``` script.
 
+![Run stack.sh]({{ site.url }}/assets/devstack-successfully-stack.png)
 
 ###Prepare DevStack
 
@@ -364,6 +365,14 @@ For example the required rules for a compute node can be the following:
 ~ $ VBoxManage controlvm DevStack natpf1 "HTTPS, tcp, 127.0.0.1, 443, 10.0.2.15, 443"
 ```
 More information regarding Openstack default ports can be found on [Appendix A. Firewalls and default ports](http://docs.openstack.org/juno/config-reference/content/firewalls-default-ports.html).
+
+![Port forwarding]({{ site.url }}/assets/virtualbox-port forwarding.png)
+
+###Result
+
+![Openstack - Horizon]({{ site.url }}/assets/openstack-horizon.png)
+
+![Openstack - Horizon - Hypervisors]({{ site.url }}/assets/openstack-hypervisors.png)
 
 ##Troubleshooting
 
