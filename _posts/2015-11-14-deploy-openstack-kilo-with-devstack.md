@@ -1,7 +1,10 @@
 ---
 layout: post
-title: Deploy OpenStack Kilo 
-subtitle: with DevStack
+title: Deploy OpenStack Kilo with DevStack
+subtitle: Step by step tutorial for deploying OpenStack
+description:
+author: Alexandru Coman
+image: deploy-openstack-kilo-with-devstack.png
 ---
 
 ### Table of Contents
@@ -130,7 +133,7 @@ iface eth1 inet manual
 
 **IMPORTANT:** The following config file is a template. Please use your own settings.
 
-{% highlight vim%} 
+{% highlight ini%} 
 [[local|localrc]]
 HOST_IP=10.0.2.15
 DEVSTACK_BRANCH=stable/kilo
