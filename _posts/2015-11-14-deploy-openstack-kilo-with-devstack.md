@@ -37,7 +37,7 @@ Note: The Hypervisor used for this example is **VirtualBox**
 
 ##Setting up the system
 
-```bash
+{% highlight bash%} 
 # Update the apt-get
 ~ $ sudo apt-get update
 
@@ -52,17 +52,18 @@ Note: The Hypervisor used for this example is **VirtualBox**
 
 # Disable rx/tx vlan offloading
 ~ $ sudo ethtool -K eth1 txvlan off rxvlan off
-```
+{% endhighlight %}
+
 
 ###Edit network Interfaces
 
-```bash
+{% highlight bash%} 
 ~ $ sudo vim /etc/network/interfaces
-```
+{% endhighlight %}
 
 **IMPORTANT:** This is a template. Please use your own settings.
 
-```yaml
+{% highlight yaml%} 
 # This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).
 
@@ -92,43 +93,44 @@ iface eth1 inet manual
     up ip link set eth1 promisc on
     down ip link set eth1 promisc off
     down ip link set eth1 down
-```
+{% endhighlight %}
+
 
 **IMPORTANT:** After you edit ```/etc/network/interfaces``` the ```network service``` should be restarted.
 
-```bash
+{% highlight bash%} 
 ~ $ sudo service network restart
-```
+{% endhighlight %}
 
 ### Add OVS Bridges
 
-```bash
+{% highlight bash%} 
 ~ $ sudo ovs-vsctl add-br br-eth1
 ~ $ sudo ovs-vsctl add-port br-eth1 eth1
 
 ~ $ sudo ovs-vsctl add-br br-ex
 ~ $ sudo ovs-vsctl add-port br-ex eth2
-```
+{% endhighlight %}
 
 ##Setting up the OpenStack environment
 
 ###Clone DevStack
 
-```bash
+{% highlight bash%} 
 ~ $ cd
 ~ $ git clone https://github.com/openstack-dev/devstack.git
 ~ $ cd devstack
-```
+{% endhighlight %}
 
 ###Change local.conf
 
-```bash
+{% highlight bash%} 
 ~ $ sudo vim ~/devstack/local.conf
-```
+{% endhighlight %}
 
 **IMPORTANT:** The following config file is a template. Please use your own settings.
 
-```ini
+{% highlight ini%} 
 [[local|localrc]]
 HOST_IP=10.0.2.15
 DEVSTACK_BRANCH=stable/kilo
@@ -256,38 +258,37 @@ REQUIREMENTS_BRANCH=$DEVSTACK_BRANCH
 min_pool_size = 5
 max_pool_size = 50
 max_overflow = 50
-```
+{% endhighlight %}
 More information regarding local.conf can be found on [Devstack configuration](http://docs.openstack.org/developer/devstack/configuration.html).
 
 ###Edit ~/.bashrc
 
-```bash
+{% highlight bash%} 
 ~ $ vim ~/.bashrc
-```
+{% endhighlight %}
 
 Add this lines at the end of file.
 
-```bash
+{% highlight bash%} 
 export OS_USERNAME=admin
 export OS_PASSWORD=Passw0rd
 export OS_TENANT_NAME=admin
 export OS_AUTH_URL=http://127.0.0.1:5000/v2.0
-```
+{% endhighlight %}
 
 ###Run stack.sh
 
-```bash
+{% highlight bash%} 
 ~ $ cd ~/devstack
 ~ $ ./stack.sh
-```
+{% endhighlight %}
 
 **IMPORTANT:** If the scripts doesn't end properly or something else goes wrong, please unstack first using ```./unstack.sh``` script.
 
-![Run stack.sh]({{ site.url }}/assets/devstack-successfully-stack.png)
 
 ###Prepare DevStack
 
-```bash
+{% highlight bash%} 
 #!/bin/bash
 KEY="$HOME/.ssh/devstack_key"
 
@@ -313,14 +314,14 @@ nova secgroup-add-rule default tcp 3389 3389 0.0.0.0/0
 sudo iptables -D INPUT -j REJECT --reject-with icmp-host-prohibited
 sudo iptables -D FORWARD -j REJECT --reject-with icmp-host-prohibited
 sudo service iptables save
-```
+{% endhighlight %}
 
 ###Port forwarding
 In order to access services from the DevStack virtual machine from the host machine we need to forward the to host.
 
 For each used port we need to run one of the following commands:
 
-```bash
+{% highlight bash%} 
 # If the virtual machine is in power off state.
 VBoxManage --modifyvm DevStack [--natpf<1-N> [<rulename>],tcp|udp,[<hostip>],
                                 <hostport>,[<guestip>],<guestport>]
@@ -328,12 +329,11 @@ VBoxManage --modifyvm DevStack [--natpf<1-N> [<rulename>],tcp|udp,[<hostip>],
 # If the virtual machine is running
 VBoxManage --controlvm DevStack natpf<1-N> [<rulename>],tcp|udp,[<hostip>],
                                 <hostport>,[<guestip>],<guestport> |
-
-```
+{% endhighlight %}
 
 For example the required rules for a compute node can be the following:
 
-```bash
+{% highlight bash%}
 # Message Broker (AMQP traffic) - 5672
 ~ $ VBoxManage controlvm DevStack natpf1 "Message Broker (AMQP traffic), tcp, 127.0.0.1, 5672, 10.0.2.15, 5672"
 
@@ -363,10 +363,11 @@ For example the required rules for a compute node can be the following:
 
 # HTTPS - 443
 ~ $ VBoxManage controlvm DevStack natpf1 "HTTPS, tcp, 127.0.0.1, 443, 10.0.2.15, 443"
-```
-More information regarding Openstack default ports can be found on [Appendix A. Firewalls and default ports](http://docs.openstack.org/juno/config-reference/content/firewalls-default-ports.html).
+{% endhighlight %}
 
 ![Port forwarding]({{ site.url }}/assets/virtualbox-port forwarding.png)
+
+More information regarding Openstack default ports can be found on [Appendix A. Firewalls and default ports](http://docs.openstack.org/juno/config-reference/content/firewalls-default-ports.html).
 
 ###Result
 
@@ -374,37 +375,38 @@ More information regarding Openstack default ports can be found on [Appendix A. 
 
 ![Openstack - Horizon - Hypervisors]({{ site.url }}/assets/openstack-hypervisors.png)
 
+
 ##Troubleshooting
 
 ###OpenStack role list raises unrecognized arguments: --group
 
-```
+{% highlight bash%}
 ::./stack.sh:780+openstack role list --group 3c65c1a8d12f40a2a9949d5b2922beae --project 18ab3a46314442b183db43bc13b175b4 --column ID --column Name
 usage: openstack role list [-h] [-f {csv,html,json,table,yaml}] [-c COLUMN]
                            [--max-width <integer>]
                            [--quote {all,minimal,none,nonnumeric}]
                            [--project <project>] [--user <user>]
 openstack role list: error: unrecognized arguments: --group 3c65c1a8d12f40a2a9949d5b2922beae
-```
+{% endhighlight %}
 
 Code location at `lib/keystone:418`, invoked by `functions-common:773`.
 
 The first reason is that the python-openstackclient version is too old (`openstack --version`), upgrade it:
 
-```bash
+{% highlight bash%} 
 ~ $ sudo pip install --upgrade python-openstackclient
-```
+{% endhighlight %}
 
 You need to add python-openstackclient to LIBS_FROM_GIT in local.conf, to make sure devstack uses the newest version of python-openstackclient. Note that, devstack will use master branch of python-openstackclient instead of stable/kilo.
 
-```ini
+{% highlight ini%} 
 # Add python-openstackclient to your LIBS_FROM_GIT
 LIBS_FROM_GIT=python-openstackclient
-```
+{% endhighlight %}
 
 The next step, since keystone v2.0 doesn't even have the concept "group", you need to force here to use keystone V3 api.
 
-```diff
+{% highlight diff%} 
 diff --git a/functions-common b/functions-common
 index a5c51da..5ee7a58 100644
 --- a/functions-common
@@ -426,10 +428,10 @@ index a5c51da..5ee7a58 100644
      if [[ -z "$group_role_id" ]]; then
          # Adds role to group
 
-```
+{% endhighlight %}
 
-```bash
+{% highlight bash%} 
 ~ $ wget https://goo.gl/0a8NDK -O functions-common.diff
 ~ $ git apply functions-common.diff
 ~ $ rm functions-common.diff
-```
+{% endhighlight %}
