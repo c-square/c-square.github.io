@@ -366,13 +366,13 @@ For example the required rules for a compute node can be the following:
 ```
 More information regarding Openstack default ports can be found on [Appendix A. Firewalls and default ports](http://docs.openstack.org/juno/config-reference/content/firewalls-default-ports.html).
 
-![Port forwarding]({{ site.url }}/assets/virtualbox-port forwarding.png)
+![Port forwarding]({{ site.url }}/assets/virtualbox-port forwarding.png){: .center-image .fit-to-parent}
 
 ###Result
 
-![Openstack - Horizon]({{ site.url }}/assets/openstack-horizon.png)
+![Openstack - Horizon]({{ site.url }}/assets/openstack-horizon.png){: .center-image .fit-to-parent}
 
-![Openstack - Horizon - Hypervisors]({{ site.url }}/assets/openstack-hypervisors.png)
+![Openstack - Horizon - Hypervisors]({{ site.url }}/assets/openstack-hypervisors.png){: .center-image .fit-to-parent}
 
 ##Troubleshooting
 

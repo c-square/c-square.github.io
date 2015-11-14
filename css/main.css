@@ -406,3 +406,16 @@ header.header-post .post-heading .post-subheading {
 .blog-post table tr td :last-child {
   margin-bottom: 0;
 }
+
+/* --- CUSTOM --- */
+
+.center-image
+{
+    margin: 0 auto;
+    display: block;
+}
+
+.fit-to-parent
+{
+    width: 100%;	
+}
