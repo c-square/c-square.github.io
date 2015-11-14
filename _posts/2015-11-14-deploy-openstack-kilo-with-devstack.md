@@ -16,12 +16,12 @@ image: deploy-openstack-kilo-with-devstack.png
 - [Setting up the OpenStack environment](#setting-up-the-openstack-environment)
     - [Clone DevStack](#clone-devstack)
     - [Change local.conf](#change-local-conf)
-    - [Edit ~/.bashrc](#edit-bashrc)
+    - [Edit ~/.shellrc](#edit-shellrc)
     - [Run stack.sh](#run-stack-sh)
     - [Prepare DevStack](#prepare-devstack)
     - [Port forwarding](#port-forwarding)
 - [Troubleshooting](#troubleshooting)
-	- [OpenStack role list raises unrecognized arguments: –group](#openstack-role-list-raises-unrecognized-arguments-group)
+    - [OpenStack role list raises unrecognized arguments: –group](#openstack-role-list-raises-unrecognized-arguments-group)
 
 
 ##Create the Virtual Machine
@@ -40,7 +40,7 @@ Note: The Hypervisor used for this example is **VirtualBox**
 
 ##Setting up the system
 
-{% highlight bash%} 
+{% highlight bash %}
 # Update the apt-get
 ~ $ sudo apt-get update
 
@@ -60,13 +60,13 @@ Note: The Hypervisor used for this example is **VirtualBox**
 
 ###Edit network Interfaces
 
-{% highlight bash%} 
+{% highlight bash %}
 ~ $ sudo vim /etc/network/interfaces
 {% endhighlight %}
 
 **IMPORTANT:** This is a template. Please use your own settings.
 
-{% highlight yaml%} 
+{% highlight vim %}
 # This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).
 
@@ -101,13 +101,13 @@ iface eth1 inet manual
 
 **IMPORTANT:** After you edit ```/etc/network/interfaces``` the ```network service``` should be restarted.
 
-{% highlight bash%} 
+{% highlight bash %}
 ~ $ sudo service network restart
 {% endhighlight %}
 
 ### Add OVS Bridges
 
-{% highlight bash%} 
+{% highlight bash %}
 ~ $ sudo ovs-vsctl add-br br-eth1
 ~ $ sudo ovs-vsctl add-port br-eth1 eth1
 
@@ -119,7 +119,7 @@ iface eth1 inet manual
 
 ###Clone DevStack
 
-{% highlight bash%} 
+{% highlight bash %}
 ~ $ cd
 ~ $ git clone https://github.com/openstack-dev/devstack.git
 ~ $ cd devstack
@@ -127,30 +127,26 @@ iface eth1 inet manual
 
 ###Change local.conf
 
-{% highlight bash%} 
+{% highlight bash %}
 ~ $ sudo vim ~/devstack/local.conf
 {% endhighlight %}
 
 **IMPORTANT:** The following config file is a template. Please use your own settings.
 
-{% highlight ini%} 
-[[local|localrc]]
-HOST_IP=10.0.2.15
-DEVSTACK_BRANCH=stable/kilo
+We will specify all the services that should be installed on the OpenStack environment.
 
-# Change the following password
-DATABASE_PASSWORD=Passw0rd
-RABBIT_PASSWORD=Passw0rd
-SERVICE_TOKEN=Passw0rd
-SERVICE_PASSWORD=Passw0rd
-ADMIN_PASSWORD=Passw0rd
+{% highlight bash %}
 
 #Services to be started
+
+# Requirements
 enable_service rabbit
 enable_service mysql
 
+# Keystone
 enable_service key
 
+# Nova
 enable_service n-api
 enable_service n-crt
 enable_service n-obj
@@ -158,9 +154,9 @@ enable_service n-cond
 enable_service n-sch
 enable_service n-cauth
 enable_service n-novnc
-# Disable Nova networking
-disable_service n-net
+enable_service n-cpu
 
+# Neutron
 enable_service neutron
 enable_service q-svc
 enable_service q-agt
@@ -172,16 +168,22 @@ enable_service q-fwaas
 enable_service q-metering
 enable_service q-vpn
 
+# Horizon
 enable_service horizon
 
+# Glance
 enable_service g-api
 enable_service g-reg
 
+# Cinder
 enable_service cinder
 enable_service c-api
 enable_service c-vol
 enable_service c-sch
 enable_service c-bak
+
+# Services that should not be installed
+disable_service n-net
 
 disable_service s-proxy
 disable_service s-object
@@ -194,15 +196,28 @@ disable_service h-api-cfn
 disable_service h-api-cw
 disable_service h-eng
 
+disable_service ceilometer-acompute
 disable_service ceilometer-acentral
 disable_service ceilometer-collector
 disable_service ceilometer-api
 
 disable_service tempest
+{% endhighlight %}
 
-# To add a local compute node, enable the following services
-enable_service n-cpu
-disable_service ceilometer-acompute
+Next, we will specify the general setting regarding the OpenStack environment.
+
+{% highlight ini %}
+
+# Change the following password
+DATABASE_PASSWORD=Passw0rd
+RABBIT_PASSWORD=Passw0rd
+SERVICE_TOKEN=Passw0rd
+SERVICE_PASSWORD=Passw0rd
+ADMIN_PASSWORD=Passw0rd
+
+[[local|localrc]]
+HOST_IP=10.0.2.15
+DEVSTACK_BRANCH=stable/kilo
 
 IMAGE_URLS+=",https://people.debian.org/~aurel32/qemu/amd64/debian_wheezy_amd64_standard.qcow2"
 
@@ -262,17 +277,19 @@ min_pool_size = 5
 max_pool_size = 50
 max_overflow = 50
 {% endhighlight %}
+
+
 More information regarding local.conf can be found on [Devstack configuration](http://docs.openstack.org/developer/devstack/configuration.html).
 
-###Edit ~/.bashrc
+###Edit ~/.shellrc
 
-{% highlight bash%} 
-~ $ vim ~/.bashrc
+{% highlight bash %}
+~ $ vim ~/.shellrc
 {% endhighlight %}
 
 Add this lines at the end of file.
 
-{% highlight bash%} 
+{% highlight bash %}
 export OS_USERNAME=admin
 export OS_PASSWORD=Passw0rd
 export OS_TENANT_NAME=admin
@@ -281,7 +298,7 @@ export OS_AUTH_URL=http://127.0.0.1:5000/v2.0
 
 ###Run stack.sh
 
-{% highlight bash%} 
+{% highlight bash %}
 ~ $ cd ~/devstack
 ~ $ ./stack.sh
 {% endhighlight %}
@@ -291,8 +308,8 @@ export OS_AUTH_URL=http://127.0.0.1:5000/v2.0
 
 ###Prepare DevStack
 
-{% highlight bash%} 
-#!/bin/bash
+{% highlight bash %}
+#!/bin/shell
 KEY="$HOME/.ssh/devstack_key"
 
 # I. Public / Private Keys
@@ -324,7 +341,7 @@ In order to access services from the DevStack virtual machine from the host mach
 
 For each used port we need to run one of the following commands:
 
-{% highlight bash%} 
+{% highlight bash %}
 # If the virtual machine is in power off state.
 VBoxManage --modifyvm DevStack [--natpf<1-N> [<rulename>],tcp|udp,[<hostip>],
                                 <hostport>,[<guestip>],<guestport>]
@@ -336,7 +353,7 @@ VBoxManage --controlvm DevStack natpf<1-N> [<rulename>],tcp|udp,[<hostip>],
 
 For example the required rules for a compute node can be the following:
 
-{% highlight bash%}
+{% highlight bash %}
 # Message Broker (AMQP traffic) - 5672
 ~ $ VBoxManage controlvm DevStack natpf1 "Message Broker (AMQP traffic), tcp, 127.0.0.1, 5672, 10.0.2.15, 5672"
 
@@ -383,7 +400,7 @@ More information regarding Openstack default ports can be found on [Appendix A. 
 
 ###OpenStack role list raises unrecognized arguments: --group
 
-{% highlight bash%}
+{% highlight bash %}
 ::./stack.sh:780+openstack role list --group 3c65c1a8d12f40a2a9949d5b2922beae --project 18ab3a46314442b183db43bc13b175b4 --column ID --column Name
 usage: openstack role list [-h] [-f {csv,html,json,table,yaml}] [-c COLUMN]
                            [--max-width <integer>]
@@ -396,20 +413,20 @@ Code location at `lib/keystone:418`, invoked by `functions-common:773`.
 
 The first reason is that the python-openstackclient version is too old (`openstack --version`), upgrade it:
 
-{% highlight bash%} 
+{% highlight bash %}
 ~ $ sudo pip install --upgrade python-openstackclient
 {% endhighlight %}
 
 You need to add python-openstackclient to LIBS_FROM_GIT in local.conf, to make sure devstack uses the newest version of python-openstackclient. Note that, devstack will use master branch of python-openstackclient instead of stable/kilo.
 
-{% highlight ini%} 
+{% highlight ini %}
 # Add python-openstackclient to your LIBS_FROM_GIT
 LIBS_FROM_GIT=python-openstackclient
 {% endhighlight %}
 
 The next step, since keystone v2.0 doesn't even have the concept "group", you need to force here to use keystone V3 api.
 
-{% highlight diff%} 
+{% highlight diff %}
 diff --git a/functions-common b/functions-common
 index a5c51da..5ee7a58 100644
 --- a/functions-common
@@ -433,7 +450,7 @@ index a5c51da..5ee7a58 100644
 
 {% endhighlight %}
 
-{% highlight bash%} 
+{% highlight bash %}
 ~ $ wget https://goo.gl/0a8NDK -O functions-common.diff
 ~ $ git apply functions-common.diff
 ~ $ rm functions-common.diff

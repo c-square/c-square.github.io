@@ -15,8 +15,8 @@ subtitle: Technical blog
     </a>
 
     <p class="post-meta">
-      Posted on {{ post.date | date: "%B %-d, %Y" }}      
-      {% if post.author %}, Author: {{ post.author }} {% endif %}
+      {% if post.author %}Author: {{ post.author }} {% endif %}
+      Posted on {{ post.date | date: "%B %-d, %Y" }}
     </p>
 
     {% if post.image or post.description %}
