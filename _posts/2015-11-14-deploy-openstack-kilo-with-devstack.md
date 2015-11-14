@@ -365,15 +365,15 @@ For example the required rules for a compute node can be the following:
 ~ $ VBoxManage controlvm DevStack natpf1 "HTTPS, tcp, 127.0.0.1, 443, 10.0.2.15, 443"
 {% endhighlight %}
 
-![Port forwarding]({{ site.url }}/assets/virtualbox-port forwarding.png)
+![Port forwarding]({{ site.url }}/assets/virtualbox-port forwarding.png){: .center-image .fit-to-parent}
 
 More information regarding Openstack default ports can be found on [Appendix A. Firewalls and default ports](http://docs.openstack.org/juno/config-reference/content/firewalls-default-ports.html).
 
 ###Result
 
-![Openstack - Horizon]({{ site.url }}/assets/openstack-horizon.png)
+![Openstack - Horizon]({{ site.url }}/assets/openstack-horizon.png){: .center-image .fit-to-parent}
 
-![Openstack - Horizon - Hypervisors]({{ site.url }}/assets/openstack-hypervisors.png)
+![Openstack - Horizon - Hypervisors]({{ site.url }}/assets/openstack-hypervisors.png){: .center-image .fit-to-parent}
 
 
 ##Troubleshooting
