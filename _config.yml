@@ -26,7 +26,7 @@ footer-links-active:
 
 # Output options (more information on Jekyll's site)
 timezone: "Europe/Bucharest"
-markdown: kramdown
+markdown: redcarpet
 highlighter: pygments
 permalink: /:year-:month-:day-:title
 paginate: 5
