@@ -22,6 +22,12 @@ image:
   - II.2. [Check the elasticluster](#ii2-check-the-elasticluster)
   - II.3. [Elasticluster config file](#ii3-elasticluster-config-file)
   - II.4. [Set the subscription_id](#ii4-set-the-subscriptionid)
+- III. [EvoRepo Cluster](#iii-evorepo-cluster)
+  - III.1. [Create the cluster](#iii1-create-the-cluster)
+  - III.2. [Setup the cluster](#iii2-setup-the-cluster)
+  - III.3. [Destroy the cluster](#iii3-destroy-the-cluster)
+  - III.4. [Connect to cluster](#iii4-connect-to-cluster)
+
 
 ##I. Host setup
 
@@ -270,7 +276,7 @@ compute_groups = slurm_clients
 global_var_slurm_selecttype = select/cons_res
 global_var_slurm_selecttypeparameters = CR_Core_Memory
 
-[cluster/bcbio]
+[cluster/evorepo]
 cloud = azure-cloud
 login = azure-login
 ssh_to = frontend
@@ -283,10 +289,10 @@ root_volume_size = 20
 flavor = Small
 location = East US
 wait_timeout = 600
-base_name = bcbio
+base_name = evorepo
 global_var_ansible_ssh_host_key_dsa_public = ''
 
-[cluster/bcbio/frontend]
+[cluster/evorepo/frontend]
 flavor = Small
 encrypted_volume_size = 20
 encrypted_volume_type = io1
@@ -364,4 +370,217 @@ with
 ```ini
 # Change the xxx with the value from Windows Azure Portal
 subscription_id = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+##III. EvoRepo Cluster
+
+###III.1. Create the cluster
+
+When you start a new cluster, elasticluster will:
+
+- create the requested/configured number of virtual machines.
+- wait until all the virtual machines are started.
+- wait until elasticluster is able to connect to all the virtual machines using ssh.
+- run ansible on all the virtual machines (unless --no-setup option is given).
+
+This process can take several minutes, depending on the load of the cloud, the configuration of the cluster and your connection speed. Elasticluster usually print very few information on what’s happening, if you run it with `-v` it will display a more verbose output (including output of ansible command) to help you understanding what is actually happening.
+
+```bash
+~ $ elasticluster \
+  --storage /home/alex/.evorepo/storage \
+  --config /home/alex/.evorepo/azure.config \
+  start evorepo
+```
+
+```vim
+Starting cluster `evorepo` with 1 compute nodes.
+Starting cluster `evorepo` with 1 frontend nodes.
+(this may take a while...)
+Configuring the cluster.
+(this too may take a while...)
+Your cluster is ready!
+
+Cluster name:     evorepo
+Cluster template: evorepo
+Default ssh to node: frontend001
+- compute nodes: 1
+- frontend nodes: 1
+
+To login on the frontend node, run the command:
+
+    elasticluster ssh evorepo
+
+To upload or download files to the cluster, use the command:
+
+    elasticluster sftp evorepo
+```
+
+###III.2. Setup the cluster
+
+The setup command will run ansible on the desired cluster once again. It is usually needed only when you customize and update your playbooks, in order to re-configure the cluster, since the start command already run ansible when all the machines are started.
+
+```
+~ $ elasticluster \
+  --storage /home/alex/.evorepo/storage \
+  --config /home/alex/.evorepo/azure.config \
+  setup evorepo
+```
+
+```vim
+Configuring cluster `evorepo`...
+ _________________________
+< PLAY [Collecting facts] >
+ -------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+ _________________
+< GATHERING FACTS >
+ -----------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+ok: [frontend001]
+ok: [compute001]
+ ________________________________
+< TASK: group_by key="$gc3group" >
+ --------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+changed: [frontend001]
+ ____________________________
+< PLAY [GC3 master playbook] >
+ ----------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+skipping: no hosts matched
+ _____________________
+< PLAY [Common setup] >
+ ---------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+ _________________
+< GATHERING FACTS >
+ -----------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+ok: [frontend001]
+ok: [compute001]
+ ____________________________________________
+< TASK: Ensure that package cache is updated >
+ --------------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+
+changed: [frontend001]
+changed: [compute001]
+
+# ...
+```
+
+###III.3. Destroy the cluster
+
+The stop command will terminate all the instances running and delete all information related to the cluster saved on the local disk.
+
+**WARNING**: elasticluster doesn’t do any kind of test to check if the cluster is used!
+
+```
+~ $ elasticluster \
+  --storage /home/alex/.evorepo/storage \
+  --config /home/alex/.evorepo/azure.config \
+  stop evorepo
+```
+
+```
+Do you want really want to stop cluster evorepo? [yN] Y
+Destroying cluster `evorepo`
+INFO:gc3.elasticluster:shutting down instance `evorepo_vm0000_evorepo-compute001`
+INFO:gc3.elasticluster:shutting down instance `evorepo_vm0001_evorepo-compute002`
+```
+
+###III.4. Connect to cluster
+
+After a cluster is started, the easiest way to login on it is by using the `ssh` command. This command will run the ssh command with the correct options to connect to the cluster using the configured values for user and ssh key to use.
+
+If no `ssh_to option` is specified in the configuration file, the ssh command will connect to the first host belonging to the type which comes first in alphabetic order, otherwise it will connect to the first host of the group specified by the `ssh_to option` of the cluster section.
+
+
+```
+~ $ elasticluster \
+  --storage /home/alex/.evorepo/storage \
+  --config /home/alex/.evorepo/azure.config \
+  ssh evorepo
+```
+
+```bash
+Welcome to Ubuntu 14.04.3 LTS (GNU/Linux 3.13.0-68-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com/
+
+  System information as of Mon Nov 23 14:55:35 UTC 2015
+
+  System load:  0.49               Processes:              244
+  Usage of /:   10.9% of 28.80GB   Users logged in:        0
+  Memory usage: 16%                IP address for eth0:    XXX.XXX.XXX
+  Swap usage:   0%                 IP address for docker0: 172.17.0.1
+
+  Graph this data and manage this system at:
+    https://landscape.canonical.com/
+
+  Get cloud support with Ubuntu Advantage Cloud Guest:
+    http://www.ubuntu.com/business/services/cloud
+
+
+Last login: Mon Nov 23 14:55:24 2015 from 79.112.77.237
+
+ubuntu@frontend001:~$ whoami
+ubuntu
+
+ubuntu@frontend001:~$ cd /encrypted/
+ubuntu@frontend001:/encrypted$ ls
+ubuntu@frontend001:/encrypted$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/sda1        29G  3.2G   25G  12% /
+none            4.0K     0  4.0K   0% /sys/fs/cgroup
+udev            827M  8.0K  827M   1% /dev
+tmpfs           168M  412K  168M   1% /run
+none            5.0M     0  5.0M   0% /run/lock
+none            840M     0  840M   0% /run/shm
+none            100M     0  100M   0% /run/user
+/dev/sdb1        69G   52M   66G   1% /mnt
+
+ubuntu@frontend001:/encrypted$ exit
+logout
 ```
