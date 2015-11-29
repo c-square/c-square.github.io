@@ -33,7 +33,7 @@ image: deploy-openstack-kilo-with-devstack.png
 - Network:
     - Network Adapter 1:  **NAT**
     - Network Adapter 2:  **Host Only**
-    - Network Adapter 3:  **Nat**
+    - Network Adapter 3:  **NAT**
 - Operating system - **Ubuntu Server 14.04** (Recommended) 
 
 Note: The Hypervisor used for this example is **VirtualBox**
@@ -101,8 +101,11 @@ iface eth2 inet manual
 **IMPORTANT:** After you edit ```/etc/network/interfaces``` the ```network service``` should be restarted.
 
 ```bash
-~ $ sudo service network restart
+~ $ sudo service networking restart
 ```
+
+**Note**: If the above command fails a reboot will be required.
+
 
 ### Add OVS Bridges
 
@@ -122,9 +125,10 @@ iface eth2 inet manual
 ~ $ cd
 ~ $ git clone https://github.com/openstack-dev/devstack.git
 ~ $ cd devstack
+~ $ git checkout stable/kilo
 ```
 
-###Change local.conf
+###Create the local.conf
 
 ```bash
 ~ $ sudo vim ~/devstack/local.conf
@@ -132,7 +136,73 @@ iface eth2 inet manual
 
 **IMPORTANT:** The following config file is a template. Please use your own settings.
 
-We will specify all the services that should be installed on the OpenStack environment.
+We will start with general information related to our deployment.
+
+```ini
+[[local|localrc]]
+HOST_IP=10.0.2.15
+DEVSTACK_BRANCH=stable/kilo
+DEVSTACK_PASSWORD=Passw0rd
+
+# Change the following passwords
+DATABASE_PASSWORD=$DEVSTACK_PASSWORD
+RABBIT_PASSWORD=$DEVSTACK_PASSWORD
+SERVICE_TOKEN=$DEVSTACK_PASSWORD
+SERVICE_PASSWORD=$DEVSTACK_PASSWORD
+ADMIN_PASSWORD=$DEVSTACK_PASSWORD
+
+KEYSTONE_BRANCH=$DEVSTACK_BRANCH
+NOVA_BRANCH=$DEVSTACK_BRANCH
+NEUTRON_BRANCH=$DEVSTACK_BRANCH
+SWIFT_BRANCH=$DEVSTACK_BRANCH
+GLANCE_BRANCH=$DEVSTACK_BRANCH
+CINDER_BRANCH=$DEVSTACK_BRANCH
+HEAT_BRANCH=$DEVSTACK_BRANCH
+TROVE_BRANCH=$DEVSTACK_BRANCH
+HORIZON_BRANCH=$DEVSTACK_BRANCH
+TROVE_BRANCH=$DEVSTACK_BRANCH
+REQUIREMENTS_BRANCH=$DEVSTACK_BRANCH
+
+IMAGE_URLS+=",https://people.debian.org/~aurel32/qemu/amd64/debian_wheezy_amd64_standard.qcow2"
+
+Q_PLUGIN=ml2
+Q_ML2_PLUGIN_MECHANISM_DRIVERS=openvswitch
+Q_ML2_TENANT_NETWORK_TYPE=vlan
+
+PHYSICAL_NETWORK=physnet1
+OVS_PHYSICAL_BRIDGE=br-eth1
+OVS_BRIDGE_MAPPINGS=physnet1:br-eth1
+
+OVS_ENABLE_TUNNELING=False
+ENABLE_TENANT_VLANS=True
+TENANT_VLAN_RANGE=500:2000
+
+GUEST_INTERFACE_DEFAULT=eth1
+PUBLIC_INTERFACE_DEFAULT=eth2
+
+FLOATING_RANGE=10.0.2.64/26
+PUBLIC_NETWORK_GATEWAY=10.0.2.65
+Q_FLOATING_ALLOCATION_POOL=start=10.0.2.66,end=10.0.2.126
+
+FIXED_NETWORK_SIZE=256
+FIXED_RANGE=10.100.0.0/24
+NETWORK_GATEWAY=10.100.0.2
+
+CINDER_SECURE_DELETE=False
+VOLUME_BACKING_FILE_SIZE=50000M
+
+LIVE_MIGRATION_AVAILABLE=False
+USE_BLOCK_MIGRATION_FOR_LIVE_MIGRATION=False
+
+LIBVIRT_TYPE=kvm
+API_RATE_LIMIT=False
+
+SCREEN_LOGDIR=/opt/stack/logs/screen
+VERBOSE=True
+LOG_COLOR=False
+```
+
+Now we will specify all the services that should be installed.
 
 ```bash
 #Services to be started
@@ -182,92 +252,25 @@ enable_service c-bak
 
 # Services that should not be installed
 disable_service n-net
-
 disable_service s-proxy
 disable_service s-object
 disable_service s-container
 disable_service s-account
-
 disable_service heat
 disable_service h-api
 disable_service h-api-cfn
 disable_service h-api-cw
 disable_service h-eng
-
 disable_service ceilometer-acompute
 disable_service ceilometer-acentral
 disable_service ceilometer-collector
 disable_service ceilometer-api
-
 disable_service tempest
 ```
 
-Next, we will specify the general setting regarding the OpenStack environment.
+And finally we will setup the post-config section (it will run after the layer 2 services are configured and before they are started).
 
 ```ini
-[[local|localrc]]
-HOST_IP=10.0.2.15
-DEVSTACK_BRANCH=stable/kilo
-
-# Change the following password
-DATABASE_PASSWORD=Passw0rd
-RABBIT_PASSWORD=Passw0rd
-SERVICE_TOKEN=Passw0rd
-SERVICE_PASSWORD=Passw0rd
-ADMIN_PASSWORD=Passw0rd
-
-IMAGE_URLS+=",https://people.debian.org/~aurel32/qemu/amd64/debian_wheezy_amd64_standard.qcow2"
-
-Q_PLUGIN=ml2
-Q_ML2_PLUGIN_MECHANISM_DRIVERS=openvswitch
-Q_ML2_TENANT_NETWORK_TYPE=vlan
-
-PHYSICAL_NETWORK=physnet1
-OVS_PHYSICAL_BRIDGE=br-eth1
-OVS_BRIDGE_MAPPINGS=physnet1:br-eth1
-
-OVS_ENABLE_TUNNELING=False
-ENABLE_TENANT_VLANS=True
-TENANT_VLAN_RANGE=500:2000
-
-FLAT_INTERFACE=eth0
-GUEST_INTERFACE_DEFAULT=eth1
-PUBLIC_INTERFACE_DEFAULT=eth2
-
-FLOATING_RANGE=10.0.2.64/26
-Q_FLOATING_ALLOCATION_POOL=start=10.0.2.66,end=10.0.2.126
-
-FIXED_RANGE=10.100.0.0/24
-FIXED_NETWORK_SIZE=256
-
-PUBLIC_NETWORK_GATEWAY=10.0.2.65
-NETWORK_GATEWAY=10.100.0.2
-
-CINDER_SECURE_DELETE=False
-VOLUME_BACKING_FILE_SIZE=50000M
-
-LIVE_MIGRATION_AVAILABLE=False
-USE_BLOCK_MIGRATION_FOR_LIVE_MIGRATION=False
-
-LIBVIRT_TYPE=kvm
-API_RATE_LIMIT=False
-
-SCREEN_LOGDIR=/opt/stack/logs/screen
-VERBOSE=True
-LOG_COLOR=False
-
-KEYSTONE_BRANCH=$DEVSTACK_BRANCH
-NOVA_BRANCH=$DEVSTACK_BRANCH
-NEUTRON_BRANCH=$DEVSTACK_BRANCH
-SWIFT_BRANCH=$DEVSTACK_BRANCH
-GLANCE_BRANCH=$DEVSTACK_BRANCH
-CINDER_BRANCH=$DEVSTACK_BRANCH
-HEAT_BRANCH=$DEVSTACK_BRANCH
-TROVE_BRANCH=$DEVSTACK_BRANCH
-HORIZON_BRANCH=$DEVSTACK_BRANCH
-TROVE_BRANCH=$DEVSTACK_BRANCH
-REQUIREMENTS_BRANCH=$DEVSTACK_BRANCH
-
 [[post-config|$NEUTRON_CONF]]
 [database]
 min_pool_size = 5
@@ -275,13 +278,13 @@ max_pool_size = 50
 max_overflow = 50
 ```
 
-
 More information regarding local.conf can be found on [Devstack configuration](http://docs.openstack.org/developer/devstack/configuration.html).
 
-###Edit ~/.shellrc
+
+###Edit ~/.bashrc
 
 ```bash
-~ $ vim ~/.shellrc
+~ $ vim ~/.bashrc
 ```
 
 Add this lines at the end of file.
@@ -291,6 +294,12 @@ export OS_USERNAME=admin
 export OS_PASSWORD=Passw0rd
 export OS_TENANT_NAME=admin
 export OS_AUTH_URL=http://127.0.0.1:5000/v2.0
+```
+
+And after that run the following command:
+ 
+```bash
+~ $ source ~/.bashrc
 ```
 
 ###Run stack.sh
@@ -310,11 +319,11 @@ export OS_AUTH_URL=http://127.0.0.1:5000/v2.0
 KEY="$HOME/.ssh/devstack_key"
 
 # I. Public / Private Keys
-if [ -f $KEY ];
+if [ ! -f "$KEY" ];
 then
-    ssh-keygen -f $KEY -t rsa -N ''
+    ssh-keygen -f "$KEY" -t rsa -N ''
 fi
-nova keypair-add userkey --pub_key $KEY".pub"
+nova keypair-add userkey --pub_key "$KEY.pub"
 
 # [Security Groups]
 
@@ -348,30 +357,9 @@ VBoxManage --controlvm DevStack natpf<1-N> [<rulename>],tcp|udp,[<hostip>],
                                 <hostport>,[<guestip>],<guestport> |
 ```
 
-For example the required rules for a compute node can be the following:
+For example in order to access the controller machine it will require:
 
 ```bash
-# Message Broker (AMQP traffic) - 5672
-~ $ VBoxManage controlvm DevStack natpf1 "Message Broker (AMQP traffic), tcp, 127.0.0.1, 5672, 10.0.2.15, 5672"
-
-# iSCSI target - 3260
-~ $ VBoxManage controlvm DevStack natpf1 "iSCSI target, tcp, 127.0.0.1, 3260, 10.0.2.15, 3260"
-
-# Block Storage (cinder) - 8776
-~ $ VBoxManage controlvm DevStack natpf1 "Block Storage (cinder), tcp, 127.0.0.1, 8776, 10.0.2.15, 8776"
-
-# Networking (neutron) - 9696
-~ $ VBoxManage controlvm DevStack natpf1 "Networking (neutron), tcp, 127.0.0.1, 9696, 10.0.2.15, 9696"
-
-# Identity service (keystone) - 35357 or 5000
-~ $ VBoxManage controlvm DevStack natpf1 "Identity service (keystone) administrative endpoint, tcp, 127.0.0.1, 35357, 10.0.2.15, 35357"
-
-# Image Service (glance) API - 9292
-~ $ VBoxManage controlvm DevStack natpf1 "Image Service (glance) API, tcp, 127.0.0.1, 9292, 10.0.2.15, 9292"
-
-# Image Service registry - 9191
-~ $ VBoxManage controlvm DevStack natpf1 "Image Service registry, tcp, 127.0.0.1, 9191, 10.0.2.15, 9191"
-
 # HTTP - 80
 ~ $ VBoxManage controlvm DevStack natpf1 "HTTP, tcp, 127.0.0.1, 80, 10.0.2.15, 80"
 
@@ -380,17 +368,18 @@ For example the required rules for a compute node can be the following:
 
 # HTTPS - 443
 ~ $ VBoxManage controlvm DevStack natpf1 "HTTPS, tcp, 127.0.0.1, 443, 10.0.2.15, 443"
+
 ```
 
-![Port forwarding]({{ site.url }}/assets/virtualbox-port forwarding.png){: .center-image .fit-to-parent}
+![Port forwarding]({{ site.url }}/assets/virtualbox-port forwarding.png)
 
 More information regarding Openstack default ports can be found on [Appendix A. Firewalls and default ports](http://docs.openstack.org/juno/config-reference/content/firewalls-default-ports.html).
 
 ###Result
 
-![Openstack - Horizon]({{ site.url }}/assets/openstack-horizon.png){: .center-image .fit-to-parent}
+![Openstack - Horizon]({{ site.url }}/assets/openstack-horizon.png)
 
-![Openstack - Horizon - Hypervisors]({{ site.url }}/assets/openstack-hypervisors.png){: .center-image .fit-to-parent}
+![Openstack - Horizon - Hypervisors]({{ site.url }}/assets/openstack-hypervisors.png)
 
 
 ##Troubleshooting
@@ -414,7 +403,7 @@ The first reason is that the python-openstackclient version is too old (`opensta
 ~ $ sudo pip install --upgrade python-openstackclient
 ```
 
-You need to add python-openstackclient to LIBS_FROM_GIT in local.conf, to make sure devstack uses the newest version of python-openstackclient. Note that, devstack will use master branch of python-openstackclient instead of stable/kilo.
+You need to add python-openstackclient to `LIBS_FROM_GIT` in `local.conf`, to make sure DevStack uses the newest version of `python-openstackclient`. Note that, DevStack will use `master` branch of `python-openstackclient` instead of `stable/kilo`.
 
 ```ini
 # Add python-openstackclient to your LIBS_FROM_GIT
