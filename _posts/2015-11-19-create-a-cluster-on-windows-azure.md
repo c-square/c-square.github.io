@@ -5,12 +5,7 @@ subtitle: Step by step tutorial for creating an cluster on Windows Azure using e
 description:
 author: Alexandru Coman
 image:
-tags:
-- project
-- infoiasi
-- wade
-- web
-- evorepo
+tags: [project, infoiasi, wade, web, evorepo]
 ---
 
 **Table of content**:

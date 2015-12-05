@@ -5,12 +5,7 @@ subtitle: An introduction to our project
 description:
 author: Alexandru Cîtea
 image:
-tags:
-- project
-- infoiasi
-- wade
-- web
-- evorepo
+tags: [project, infoiasi, wade, web, evorepo]
 ---
 
 

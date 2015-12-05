@@ -11,6 +11,12 @@ layout: default
         <h2 class="post-subheading">{{ page.subtitle }}</h2>
         {% endif %}
         <span class="post-meta">Posted on {{ page.date | date: "%B %-d, %Y" }}</span>
+        <br>
+        <span class="post-meta">Tags: 
+        {% for tag in page.tags %}
+          <a href="{{ site.baseurl }}/tags/{{ tag }}">{{ tag }}</a>
+        {% endfor %}
+        </span>
       </div>
      </div>
   </div>
