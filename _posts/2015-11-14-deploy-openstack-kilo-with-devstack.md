@@ -5,6 +5,12 @@ subtitle: Step by step tutorial for deploying OpenStack
 description:
 author: Alexandru Coman
 image:
+tags:
+- project
+- infoiasi
+- wade
+- web
+- evorepo
 ---
 
 ### Table of Contents
