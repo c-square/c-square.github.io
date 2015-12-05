@@ -4,7 +4,7 @@ title: Deploy OpenStack Kilo with DevStack
 subtitle: Step by step tutorial for deploying OpenStack
 description:
 author: Alexandru Coman
-image: deploy-openstack-kilo-with-devstack.png
+image:
 ---
 
 ### Table of Contents
