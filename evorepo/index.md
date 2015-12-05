@@ -1,10 +1,8 @@
 ---
 layout: page
-title: State of the art
+title: EvoRepo - State of the art
 subtitle: Technical report
 ---
-
-#EvoRepo - State of the art
 
 ##I. Introduction
 The following document describes the EvoRepo project, its general purpose and its complete technical specifications.
@@ -163,3 +161,5 @@ Technology wise, we chose to main UI frameworks to aid us:
 React.js will help us build our frontend from the UI view components perspective. It is really easy to use and lets us reuse components, linking them to other data sources. Also, React lets us update our interface in real time very easily by only modifying data in the model layer of the application.
 
 To be able to link the React.js components to our API, we will use Backbone.js to create models that keep themselves up-to-date with the data in the API.
+
+<center><iframe src="//slides.com/alexcoman/evorepo/embed" width="750" height="420" scrolling="no" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe></center>
