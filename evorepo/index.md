@@ -52,6 +52,10 @@ Because of the fact that the daemons will take care of the dynamic analysis of t
 
 This component leaves to the daemon's disposal the workspace / environment in which anything can be controllably executed.
 
+
+![Architecture Mockup]({{ site.production_url }}/assets/architecture.jpg)
+
+
 ##III.Content analysis
 
 To be able to detect the eventual problems that can occur in a open-source project, for each modification a user submits into the project, we will run a series of processing functions based on the type of project and the used internal technologies.
