@@ -34,6 +34,8 @@ The Jarvis framework will take care of the configuration of the workspace and al
 
 For the configuration of the clusters, we ended up choosing the famous "University of Zurich" developed Elasticluster. With the help of their project and Ansible playbooks, we are able to configure a batch of clusters using Windows Azure, OpenStack, AWS or Google Cloud Engine services.
 
+<center><iframe width="750" height="450" src="https://www.youtube.com/embed/gkXkcHDd588" frameborder="0" allowfullscreen></iframe></center>
+
 ###II.2. EvoRepo web
 
 EvoRepo Web is the only component of the project that is exposed to the outside world, to human or machine users. The main node of this component is the web server which will expose the human-friendly interface and also the public REST API containing the SPARQL endpoint.
